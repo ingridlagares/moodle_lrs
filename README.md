@@ -30,7 +30,7 @@ https://moodle.org/plugins/logstore_xapi
  
  - Copiar a Key e secret para configurar a xapi
 
-9- Inserir endpoint, key, secret e configurações no logstore xapi. Endpoint : http://nginx:8080/data/xAPI
+9- Inserir endpoint, key, secret e configurações no logstore xapi. Endpoint : http://nginx/data/xAPI
 
 Send statements by scheduled task? -> caso essa opção seja marcada deve-se configurar o cron ou rodar no container php cron.php (em moodle/admin/cli)
 
