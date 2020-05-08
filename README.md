@@ -1,7 +1,9 @@
 # moodle_lrs
 Moodle + Xapi + LRS em container Docker
 
-## Repositórios usados
+O Learning locker é um LRS(Learning Record Store) usado para armazenagem de dados. O Logstore xAPI é um plugin desenvolvido para enviar os logs do moodle para o Learning Locker. Esse repositório contem os arquivos necessários para criar um container para o Moodle e o Learning Locker facilitando o deploy da aplicação.
+
+## Repositórios utilizados
 https://github.com/michzimny/learninglocker2-docker
 
 https://github.com/bitnami/bitnami-docker-moodle
