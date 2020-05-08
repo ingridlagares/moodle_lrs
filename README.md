@@ -22,3 +22,24 @@ https://github.com/bitnami/bitnami-docker-moodle
 
 7- instalar o plugin logstore xapi (site administration -> plugins -> install plugins)
 https://moodle.org/plugins/logstore_xapi
+
+8- Configurar o learning locker:
+ - Settings -> stores -> criar store
+ 
+ - Settings -> Clients -> criar client -> em LRS selecionar a store criada
+ 
+ - Copiar a Key e secret para configurar a xapi
+
+9- Inserir endpoint, key, secret e configurações no logstore xapi. Endpoint : http://nginx:8080/data/xAPI
+
+Send statements by scheduled task? -> caso essa opção seja marcada deve-se configurar o cron ou rodar no container php cron.php (em moodle/admin/cli)
+
+  docker exec -it container-name /bin/bash
+  
+  php /bitnami/moodle/admin/cli/cron.php 
+
+Maximum batch size -> em ambiente de desenvolvimento é melhor colocar 0 para acompanhar cada log do moodle
+
+
+10 - habilitar o logstore xapi nos logs: your-site/admin/settings.php?section=managelogging
+ 
