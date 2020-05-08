@@ -1,0 +1,126 @@
+version: '2'
+services:
+
+  mongo:
+    image: mongo:3.4
+    restart: unless-stopped
+    volumes:
+      - "${DATA_LOCATION}/mongo:/data/db"
+
+  redis:
+    image: redis:4-alpine
+    restart: unless-stopped
+
+  xapi:
+    image: learninglocker/xapi-service:2.1.10
+    restart: unless-stopped
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/learninglocker_v2
+      - MONGO_DB=learninglocker_v2
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - "${DATA_LOCATION}/xapi-storage:/usr/src/app/storage"
+
+  api:
+    image: michzimny/learninglocker2-app:${DOCKER_TAG}
+    environment:
+      - DOMAIN_NAME
+      - APP_SECRET
+      - SMTP_HOST
+      - SMTP_PORT
+      - SMTP_SECURED
+      - SMTP_USER
+      - SMTP_PASS
+    command: "node api/dist/server"
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - "${DATA_LOCATION}/app-storage:/opt/learninglocker/storage"
+
+  ui:
+    image: michzimny/learninglocker2-app:${DOCKER_TAG}
+    environment:
+      - DOMAIN_NAME
+      - APP_SECRET
+      - SMTP_HOST
+      - SMTP_PORT
+      - SMTP_SECURED
+      - SMTP_USER
+      - SMTP_PASS
+    command: "./entrypoint-ui.sh"
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - redis
+      - api
+    volumes:
+      - "${DATA_LOCATION}/app-storage:/opt/learninglocker/storage"
+      - "${DATA_LOCATION}/ui-logs:/opt/learninglocker/logs"
+
+  worker:
+    image: michzimny/learninglocker2-app:${DOCKER_TAG}
+    environment:
+      - DOMAIN_NAME
+      - APP_SECRET
+      - SMTP_HOST
+      - SMTP_PORT
+      - SMTP_SECURED
+      - SMTP_USER
+      - SMTP_PASS
+    command: "node worker/dist/server"
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - "${DATA_LOCATION}/app-storage:/opt/learninglocker/storage"
+
+  nginx:
+    build: nginx
+    # image: michzimny/learninglocker2-nginx:${DOCKER_TAG}
+    environment:
+      - DOMAIN_NAME
+    restart: unless-stopped
+    depends_on:
+      - ui
+      - xapi
+    ports:
+      - "8443:443"
+      - "8080:80"
+
+  mariadb:
+    image: 'bitnami/mariadb:10.1'
+    environment:
+      - MARIADB_USER=bn_moodle
+      - MARIADB_DATABASE=bitnami_moodle
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - 'mariadb_data:/bitnami'
+
+  moodle:
+    image: 'bitnami/moodle:3'
+    environment:
+      - MARIADB_HOST=mariadb
+      - MARIADB_PORT_NUMBER=3306
+      - MOODLE_DATABASE_USER=bn_moodle
+      - MOODLE_DATABASE_NAME=bitnami_moodle
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./app:/bitnami
+    depends_on:
+     - mariadb
+
+volumes:
+  mariadb_data:
+    driver: local
+  moodle_data:
+    driver: local
+
